@@ -1,0 +1,1 @@
+SELECT transaction_id, customer_id, income, amount, ts, description FROM transactions;
