@@ -1,0 +1,47 @@
+{
+  "fraud_detection_policy_v2.md": {
+    "type": "fraud",
+    "version": "2.0",
+    "effective_date": "2024-01-01",
+    "department": "Security",
+    "upload_date": "2026-01-31T14:17:13.457187",
+    "file_size": 862,
+    "status": "active"
+  },
+  "loan_eligibility_framework.md": {
+    "type": "loans",
+    "version": "1.2",
+    "effective_date": "2024-01-15",
+    "department": "Lending",
+    "upload_date": "2026-01-31T14:17:13.457386",
+    "file_size": 949,
+    "status": "active"
+  },
+  "customer_support_protocols.md": {
+    "type": "support",
+    "version": "1.1",
+    "effective_date": "2024-02-01",
+    "department": "Customer Service",
+    "upload_date": "2026-01-31T14:17:13.457501",
+    "file_size": 897,
+    "status": "active"
+  },
+  "risk_assessment_framework.md": {
+    "type": "risk",
+    "version": "2.1",
+    "effective_date": "2024-01-20",
+    "department": "Risk Management",
+    "upload_date": "2026-01-31T14:17:13.457618",
+    "file_size": 1067,
+    "status": "active"
+  },
+  "transaction_monitoring_guide.md": {
+    "type": "transaction_monitoring",
+    "version": "1.3",
+    "effective_date": "2024-03-01",
+    "department": "Compliance",
+    "upload_date": "2026-01-31T14:17:13.457746",
+    "file_size": 909,
+    "status": "active"
+  }
+}
