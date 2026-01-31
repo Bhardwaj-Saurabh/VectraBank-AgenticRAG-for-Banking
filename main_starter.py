@@ -4,8 +4,9 @@ import uuid
 import logging
 import pyodbc
 import time
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Literal
 from datetime import datetime
+from pydantic import field_validator, Field
 from contextlib import contextmanager
 from semantic_kernel import Kernel
 from semantic_kernel.agents import ChatCompletionAgent, SequentialOrchestration
@@ -121,34 +122,60 @@ class DataConnector:
 
 
 class EnhancedBankingReport(KernelBaseModel):
-    """Comprehensive banking analysis report"""
-    report_id: str
-    customer_id: str
-    query: str
-    summary: str
-    key_findings: List[str] = []
-    risk_assessment: str = "medium"
-    risk_score: float = 0.5
-    recommendations: List[str] = []
-    actions_taken: List[str] = []
-    policy_references: List[str] = []
-    agent_contributions: Dict[str, Any] = {}
-    processing_metrics: Dict[str, Any] = {}
+    """Comprehensive banking analysis report with field validation"""
+    report_id: str = Field(..., min_length=1, description="Unique report identifier")
+    customer_id: str = Field(..., min_length=1, description="Customer identifier")
+    query: str = Field(..., min_length=1, description="Original customer query")
+    summary: str = Field(..., min_length=1, description="Analysis summary from agents")
+    key_findings: List[str] = Field(default=[], description="Key findings from analysis")
+    risk_assessment: Literal["low", "medium-low", "medium", "high", "critical"] = Field(
+        default="medium", description="Overall risk tier"
+    )
+    risk_score: float = Field(default=0.5, ge=0.0, le=1.0, description="Numeric risk score 0-1")
+    recommendations: List[str] = Field(default=[], description="Actionable recommendations")
+    actions_taken: List[str] = Field(default=[], description="Actions performed during analysis")
+    policy_references: List[str] = Field(default=[], description="Referenced policy documents")
+    agent_contributions: Dict[str, Any] = Field(default={}, description="Per-agent output")
+    processing_metrics: Dict[str, Any] = Field(default={}, description="Performance metrics")
     generated_by: str = "EnhancedBankingOrchestration"
-    generated_at: str = datetime.now().isoformat()
+    generated_at: str = Field(default_factory=lambda: datetime.now().isoformat())
+
+    @field_validator("risk_score")
+    @classmethod
+    def validate_risk_score(cls, v: float) -> float:
+        """Ensure risk score is within valid range"""
+        return max(0.0, min(1.0, v))
 
 
 class CustomerProfile(KernelBaseModel):
-    """Comprehensive customer profile for banking analysis"""
-    customer_id: str
-    income: float = 0.0
-    credit_score: int = 0
-    account_type: str = "standard"
-    customer_since: str = ""
-    risk_tier: str = "medium"
-    recent_transactions: List[Dict[str, Any]] = []
-    banking_products: List[str] = []
-    last_review_date: str = ""
+    """Comprehensive customer profile with financial data validation"""
+    customer_id: str = Field(..., min_length=1, description="Unique customer identifier")
+    income: float = Field(default=0.0, ge=0.0, description="Annual income in USD")
+    credit_score: int = Field(default=0, ge=0, le=850, description="Credit score (0-850)")
+    account_type: Literal["basic", "standard", "premium", "premium_plus"] = Field(
+        default="standard", description="Account tier"
+    )
+    customer_since: str = Field(default="", description="Date customer joined (YYYY-MM-DD)")
+    risk_tier: Literal["low", "medium", "high", "critical"] = Field(
+        default="medium", description="Customer risk classification"
+    )
+    recent_transactions: List[Dict[str, Any]] = Field(
+        default=[], description="Recent transaction history"
+    )
+    banking_products: List[str] = Field(default=[], description="Active banking products")
+    last_review_date: str = Field(default="", description="Last profile review (YYYY-MM-DD)")
+
+    @field_validator("credit_score")
+    @classmethod
+    def validate_credit_score(cls, v: int) -> int:
+        """Ensure credit score is within realistic range"""
+        return max(0, min(850, v))
+
+    @field_validator("income")
+    @classmethod
+    def validate_income(cls, v: float) -> float:
+        """Ensure income is non-negative"""
+        return max(0.0, v)
 
 
 class EnhancedBankingSequentialOrchestration:
