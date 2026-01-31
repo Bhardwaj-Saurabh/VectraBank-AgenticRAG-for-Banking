@@ -1,280 +1,222 @@
-# Banking Multi-Agent AI System - Student Project
+# VectraBank: Agentic RAG for Banking
 
-## 🎯 Project Overview
-
-Welcome to the Banking Multi-Agent AI System project! You'll build an intelligent banking assistant that uses multiple specialized AI agents to analyze customer queries, detect fraud, evaluate loans, assess risks, and provide comprehensive financial advice.
-
-### What You'll Build
-A sophisticated AI system that:
-- **Processes banking queries** using 6 specialized AI agents
-- **Connects to real databases** to fetch customer transaction data
-- **Analyzes financial patterns** to detect risks and opportunities
-- **Generates comprehensive reports** with actionable recommendations
+A multi-agent AI system for comprehensive banking analysis, built with Microsoft Semantic Kernel and Retrieval Augmented Generation (RAG). The system orchestrates six specialized agents to process customer queries across fraud detection, loan eligibility, customer support, risk assessment, and strategic planning.
 
 ---
 
-## 🚀 Getting Started
+## System Architecture
 
-### Prerequisites
-- Python 3.8 or higher
-- Azure account (for AI services and database)
-- Basic Python knowledge
+The system follows a layered architecture connecting user queries through a central orchestrator to specialized agents, data services, and AI models.
 
-### Setup Instructions
+![System Architecture](static/architecture.png)
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd banking-multi-agent-system
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   ```
-   Edit `.env` file with your Azure credentials.
+**Key layers:**
+- **Application Core** -- Main orchestrator (`main_starter.py`) manages the workflow
+- **Specialized Agents** -- Six domain-expert agents powered by Azure AI Foundry (GPT-4.1)
+- **Data Access Layer** -- SQL Connector, Blob Connector, and ChromaDB Manager
+- **External Services** -- Azure SQL Database, Azure Blob Storage, ChromaDB Vector Store, Azure AI Foundry
 
 ---
 
-## 📋 Project Tasks
+## Agent Orchestration
 
-### Task 1: Database Connection 🔌
-**Goal**: Connect to Azure SQL Database to fetch real customer data
+Agents execute in a sequential pipeline using Semantic Kernel's `SequentialOrchestration`. Each agent builds on the previous agent's output, culminating in a synthesized executive report.
 
-**What to implement**:
-- Complete the `DataConnector` class in `main.py`
-- Add methods to fetch customer income and transactions
-- Handle database connection errors gracefully
+![Agent Orchestration Flow](static/agentorchesstration.png)
 
-**Files to modify**: `main.py`
-**Methods to complete**:
-- `fetch_income(customer_id)`
-- `fetch_transactions(customer_id)`
-- `get_db_connection()`
-
-**Hint**: Use `pyodbc` library for database connections.
+| # | Agent | Role |
+|---|-------|------|
+| 1 | **Data Gatherer** | Customer profiling, financial metrics, policy matching |
+| 2 | **Fraud Analyst** | Transaction pattern analysis, suspicious activity detection |
+| 3 | **Loan Analyst** | Credit risk evaluation, eligibility determination |
+| 4 | **Support Specialist** | Customer experience assessment, retention strategies |
+| 5 | **Risk Analyst** | Multi-dimensional risk scoring, compliance verification |
+| 6 | **Synthesis Coordinator** | Executive report generation, strategic recommendations |
 
 ---
 
-### Task 2: AI Agent Specialization 🤖
-**Goal**: Create 6 specialized banking agents with expert knowledge
+## Data Flow
 
-**What to implement**:
-- Complete the `create_enhanced_agents()` method
-- Write detailed instructions for each agent's specialization
-- Configure proper Azure AI service integration
+The sequence diagram below shows the complete data flow from user query to final report, including interactions with Azure SQL, ChromaDB, and Azure AI Foundry.
 
-**6 Agents to Build**:
-1. **Data Gatherer** - Analyzes customer profiles and policies
-2. **Fraud Analyst** - Detects suspicious activities and patterns
-3. **Loan Analyst** - Evaluates credit risk and loan eligibility
-4. **Support Specialist** - Optimizes customer experience
-5. **Risk Analyst** - Assesses financial and compliance risks
-6. **Synthesis Coordinator** - Creates final comprehensive reports
+![Data Flow Sequence Diagram](static/dataflow.png)
 
-**Example Structure**:
-```python
-agent = ChatCompletionAgent(
-    name="Fraud_Analyst",
-    instructions="""
-    You are a fraud detection expert. Your job is to:
-    - Analyze transaction patterns for suspicious activity
-    - Identify potential fraud indicators
-    - Recommend security measures
-    - Calculate risk scores
-    """
-)
+**Three phases:**
+1. **Initialization** -- Load customer profile from Azure SQL, fetch transaction data
+2. **Analysis** -- Each agent queries ChromaDB for relevant policies and calls Azure AI Foundry for reasoning
+3. **Synthesis** -- Coordinator integrates all findings into a structured `EnhancedBankingReport`
+
+---
+
+## Project Structure
+
+```
+VectraBank-AgenticRAG-for-Banking/
+|-- main_starter.py          # Main orchestration engine + CLI entry point
+|-- blob_connector.py        # Document storage (local simulation of Azure Blob)
+|-- chroma_manager.py        # ChromaDB vector database manager (6 collections)
+|-- rag_utils.py             # PDF/DOCX/TXT reading, chunking, policy extraction
+|-- shared_state.py          # Thread-safe state management between agents
+|-- create.sql               # Azure SQL table definitions
+|-- insert.sql               # Sample customer and transaction data
+|-- query.sql                # Example queries
+|-- pyproject.toml           # Dependencies and project metadata
+|-- .env                     # Azure credentials (not committed)
+|-- REFLECTION_REPORT.md     # Architecture reflection and challenges
+|-- static/
+|   |-- architecture.png     # System architecture diagram
+|   |-- agentorchesstration.png  # Agent orchestration flow
+|   |-- dataflow.png         # Sequence diagram
 ```
 
 ---
 
-### Task 3: Data Models Enhancement 📊
-**Goal**: Enhance data structures to store comprehensive banking information
+## Tech Stack
 
-**What to implement**:
-- Add new fields to `EnhancedBankingReport` class
-- Enhance `CustomerProfile` with additional financial data
-- Implement proper data validation
-
-**New Fields to Add**:
-
-**For EnhancedBankingReport**:
-- `customer_segment` (e.g., "premium", "standard")
-- `financial_health_score` (0.0 to 1.0)
-- `compliance_status` (regulatory compliance)
-- `opportunity_areas` (potential product recommendations)
-
-**For CustomerProfile**:
-- `employment_status` (job situation)
-- `total_assets` (net worth)
-- `monthly_expenses` (spending patterns)
-- `debt_to_income_ratio` (financial health)
+| Component | Technology |
+|-----------|-----------|
+| Agent Framework | Microsoft Semantic Kernel (`SequentialOrchestration`) |
+| LLM | Azure AI Foundry -- GPT-4.1 |
+| Embeddings | Azure text-embedding-3-small |
+| Vector Database | ChromaDB (6 banking-specific collections) |
+| Relational Database | Azure SQL Database |
+| Document Storage | Local file system (Azure Blob simulation) |
+| Data Validation | Pydantic with field validators |
+| Language | Python 3.11+ |
 
 ---
 
-### Task 4: Core Business Logic 💡
-**Goal**: Implement the main banking analysis algorithms
+## Prerequisites
 
-**What to implement**:
-- Risk scoring algorithm in `_calculate_enhanced_risk_score()`
-- Financial findings generation in `_generate_enhanced_findings()`
-- Recommendation engine in `_generate_enhanced_recommendations()`
-- Context preparation in `_prepare_enhanced_context()`
-
-**Key Algorithms**:
-- **Risk Scoring**: Consider income, credit score, transactions, tenure
-- **Findings**: Generate insights from customer data and agent analysis
-- **Recommendations**: Suggest products and actions based on risk profile
+- Python 3.11 or higher
+- Azure account with:
+  - Azure AI Foundry deployment (GPT-4.1 or similar)
+  - Azure SQL Database with `transactions` table
+- macOS: `brew install unixodbc` (required by `pyodbc`)
 
 ---
 
-## 🛠️ Technical Implementation Guide
+## Setup
 
-### Database Connection Help
-```python
-# Example database connection structure
-@contextmanager
-def get_db_connection(self):
-    conn = pyodbc.connect(self.connection_string)
-    try:
-        yield conn
-    finally:
-        conn.close()
-```
+**1. Clone and install dependencies**
 
-### Agent Instructions Template
-```python
-instructions = """
-You are a [DOMAIN] expert with capabilities in:
-- [Specific skill 1]
-- [Specific skill 2]
-- [Specific skill 3]
-
-Your responsibilities:
-1. [Primary task]
-2. [Secondary task] 
-3. [Tertiary task]
-
-Focus on [expected outcomes]
-Provide [output format requirements]
-"""
-```
-
-### Risk Scoring Factors
-Consider these when calculating risk scores:
-- Income level and stability
-- Credit score and history
-- Transaction patterns
-- Customer relationship duration
-- Product usage diversity
-
----
-
-## 🧪 Testing Your Implementation
-
-### Run the System
 ```bash
-# Test your implementation
-python main.py
+git clone https://github.com/Bhardwaj-Saurabh/VectraBank-AgenticRAG-for-Banking.git
+cd VectraBank-AgenticRAG-for-Banking
+uv venv
+uv source .venv/bin/activate
+uv add -r requirements.txt
 ```
 
-### Expected Output
-When successful, you should see:
-```
-🧪 AGENT ACTIVATION TEST SUITE
-Initializing EnhancedBankingSequentialOrchestration...
-✅ Created 6 enhanced specialized agents
-🧪 Running test scenarios...
-✅ Agent Enhanced_Data_Gatherer activated
-✅ Agent Enhanced_Fraud_Analyst activated
-...
-📊 COMPREHENSIVE TEST REPORT
-Total Tests: 5
-Passed Tests: 5/5 (100%)
-Agent Activation Success: 100%
+**2. Configure environment variables**
+
+Create a `.env` file with:
+
+```env
+AZURE_TEXTGENERATOR_DEPLOYMENT_NAME=gpt-4.1
+AZURE_TEXTGENERATOR_DEPLOYMENT_ENDPOINT=https://your-endpoint.cognitiveservices.azure.com/
+AZURE_TEXTGENERATOR_DEPLOYMENT_KEY=your-api-key
+AZURE_EMBEDDING_MODEL=text-embedding-3-small
+AZURE_SQL_CONNECTION_STRING=your-sql-connection-string
 ```
 
-### Test Scenarios
-The system includes automated tests for:
-- Agent activation verification
-- Processing time measurement
-- Response quality assessment
-- Risk scoring accuracy
+**3. Set up the database (optional)**
+
+Run `create.sql` and `insert.sql` against your Azure SQL Database. The system falls back to sample data if SQL is unavailable.
 
 ---
 
-## 📁 Project Structure
-```
-banking-multi-agent-system/
-├── main.py                 # 🎯 MAIN FILE - Implement tasks here
-├── blob_connector.py       # Document storage (provided)
-├── chroma_manager.py       # Vector database (provided)
-├── rag_utils.py           # Document processing (provided)
-├── shared_state.py        # State management (provided)
-├── requirements.txt       # Dependencies
-└── .env                  # Environment variables
+## Usage
+
+```bash
+# Run everything: component tests + all 3 test scenarios
+python main_starter.py --all
+
+# Run a single demo scenario
+python main_starter.py --demo
+
+# Run all test scenarios with validation
+python main_starter.py --test
 ```
 
 ---
 
-## 💡 Implementation Tips
+## Test Results
 
-### Start Simple
-1. **First**: Implement one agent completely
-2. **Then**: Add database connection for one customer
-3. **Next**: Enhance one data model
-4. **Finally**: Connect everything together
+The system includes 29 component-level tests and 3 end-to-end scenario validations:
 
-### Debugging Help
-- Use the provided logging system
-- Test each agent individually
-- Check Azure service configurations
-- Verify database connection strings
+```
+COMPONENT TESTS: 29/29 passed
 
-### Common Issues & Solutions
-- **Database connection fails**: Check connection string and firewall rules
-- **Agents not activating**: Verify agent instructions and service configuration
-- **Risk scores inaccurate**: Review your scoring algorithm factors
+VALIDATION SUMMARY:
+  [PASS] Customer 12345: agents=6/6, risk=0.070 (low),       time=31.2s
+  [PASS] Customer 67890: agents=6/6, risk=0.470 (medium-low), time=23.1s
+  [PASS] Customer 11111: agents=6/6, risk=0.750 (high),       time=46.7s
 
----
+Overall: ALL PASSED
+```
 
-## 🎓 Learning Objectives
+**Test scenarios:**
 
-By completing this project, you'll gain experience with:
-- **Multi-agent AI systems** and orchestration
-- **Azure cloud services** integration
-- **Database connectivity** and SQL operations
-- **Financial domain** AI applications
-- **Production-ready** AI system design
+| Customer | Query Type | Risk Profile |
+|----------|-----------|--------------|
+| 12345 | Financial planning & investments | Low risk -- $75K income, 780 credit score, 5 products |
+| 67890 | Home loan eligibility | Medium risk -- $45K income, 680 credit score |
+| 11111 | Suspicious account activity | High risk -- $28K income, 620 credit score, 1 product |
 
 ---
 
-## 📞 Getting Help
+## RAG Pipeline
 
-If you get stuck:
-1. Check the TODO comments in the code
-2. Review the hint sections in this README
-3. Verify your Azure service configurations
-4. Test each component independently
-
----
-
-## 🚀 Final Checklist
-
-Before submission, ensure you have:
-- [ ] Implemented all 6 specialized agents
-- [ ] Connected to Azure SQL Database successfully
-- [ ] Enhanced both Pydantic models with new fields
-- [ ] Implemented risk scoring algorithm
-- [ ] Generated meaningful findings and recommendations
-- [ ] All test scenarios pass successfully
-- [ ] System runs without errors
+1. **Document Ingestion** -- `BlobStorageConnector` loads 5 banking policy documents (fraud, loans, support, risk, transactions)
+2. **Text Extraction** -- `rag_utils.read_document_file()` reads PDF, DOCX, and Markdown formats
+3. **Chunking** -- Documents are split into overlapping chunks at paragraph boundaries
+4. **Embedding & Storage** -- Chunks are embedded and stored in 6 ChromaDB collections
+5. **Hybrid Search** -- Combines semantic similarity with keyword boosting for retrieval
+6. **Context Injection** -- Retrieved policies are injected into agent prompts for grounded reasoning
 
 ---
 
-**Good luck with your implementation! Remember: Start small, test often, and build incrementally. You've got this! 💪**
+## Risk Scoring
+
+The `_calculate_enhanced_risk_score()` method evaluates five dimensions:
+
+| Factor | Low Risk | High Risk |
+|--------|----------|-----------|
+| Income | >= $100K (-0.15) | < $30K (+0.10) |
+| Credit Score | >= 750 (-0.15) | < 650 (+0.15) |
+| Customer Tenure | >= 5 years (-0.10) | < 1 year (+0.08) |
+| Product Diversification | >= 4 products (-0.08) | <= 1 product (+0.05) |
+| Transaction Patterns | Normal | Max > $10K (+0.10) |
+
+Score is normalized to [0.0, 1.0] and mapped to tiers: low, medium-low, medium, high, critical.
+
+---
+
+## Sample Output
+
+```
+FINAL REPORT: enhanced_a1b2c3d4
+Customer: 12345
+Risk Assessment: low (score: 0.070)
+
+Key Findings:
+  - Customer qualifies for Tier A+ or A lending products (income: $75,000.00)
+  - Excellent credit score (780) - eligible for best rates (3.5% APR)
+  - High product engagement (5 products) indicates strong customer relationship
+
+Recommendations:
+  - Continue standard monitoring with annual reviews
+  - Schedule periodic financial health review to identify emerging opportunities
+
+Policy References: fraud_detection_policy_v2.md, loan_eligibility_framework.md, ...
+Agent Contributions: [Data_Gatherer, Fraud_Analyst, Loan_Analyst, Support_Specialist, Risk_Analyst, Synthesis_Coordinator]
+```
+
+---
+
+## Documentation
+
+- [REFLECTION_REPORT.md](REFLECTION_REPORT.md) -- Architecture decisions, challenges, and improvement suggestions
+- Inline docstrings throughout all Python modules
+- Structured logging to `logs/banking_analysis_<timestamp>.log`
